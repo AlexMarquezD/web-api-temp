@@ -20,10 +20,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 })->name('user');
 
 Route::post('login', [Controller\LoginController::class, 'login'])->name('login');
-Route::post('logout', [Controller\LogoutController::class, 'logout'])->middleware('auth:sanctum')->name('logout');
+Route::post('register', [Controller\UserController::class, 'store'])->name('user.store');
 
-
-Route::post('/tokens/create', function (Request $request) {
-    $token = $request->user()->createToken($request->token_name);
-    return ['token' => $token->plainTextToken];
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('logout', [Controller\LogoutController::class, 'logout'])->name('logout');
+    Route::get('user/{id}', [Controller\UserController::class, 'show'])->name('user.show');
+    Route::get('user', [Controller\UserController::class, 'index'])->name('user.index');
+    Route::put('user/{id}', [Controller\UserController::class, 'update'])->name('user.update');
+    Route::delete('user/{id}', [Controller\UserController::class, 'destroy'])->name('user.delete');
 });

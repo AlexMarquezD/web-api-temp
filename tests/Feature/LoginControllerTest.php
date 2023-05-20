@@ -17,7 +17,7 @@ class LoginControllerTest extends TestCase
         User::factory()->create();
         Session::start();
     }
-    
+
     /**
      * A basic feature test example.
      *
