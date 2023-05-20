@@ -9,6 +9,8 @@ use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 use function PHPUnit\Framework\assertEquals;
 use function PHPUnit\Framework\assertNotEmpty;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class UserControllerTest extends TestCase
 {
@@ -17,9 +19,13 @@ class UserControllerTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
+        $this->roles();
+        $this->permissions();
+        $this->role_permission();
+        $user = User::factory()->create();
+        $this->user_role();
         Sanctum::actingAs(
-            User::factory()->create(),
-            ['*']
+            $user
         );
     }
 
@@ -102,5 +108,31 @@ class UserControllerTest extends TestCase
         return [
             'name' => 'juan'
         ];
+    }
+
+    public function roles()
+    {
+        Role::create(['name' => 'admin']);
+    }
+
+    public function permissions()
+    {
+        Permission::create(['name' => 'user-delete']);
+        Permission::create(['name' => 'user-update']);
+        Permission::create(['name' => 'user-show']);
+        Permission::create(['name' => 'user-index']);
+    }
+
+    public function role_permission()
+    {
+        $role = Role::first();
+        $permissions = Permission::all();
+        $role->givePermissionTo($permissions);
+    }
+
+    public function user_role()
+    {
+        $user = User::first();
+        $user->assignRole('admin');
     }
 }

@@ -24,8 +24,8 @@ Route::post('register', [Controller\UserController::class, 'store'])->name('user
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [Controller\LogoutController::class, 'logout'])->name('logout');
-    Route::get('user/{id}', [Controller\UserController::class, 'show'])->name('user.show');
-    Route::get('user', [Controller\UserController::class, 'index'])->name('user.index');
-    Route::put('user/{id}', [Controller\UserController::class, 'update'])->name('user.update');
-    Route::delete('user/{id}', [Controller\UserController::class, 'destroy'])->name('user.delete');
+    Route::get('user/{id}', [Controller\UserController::class, 'show'])->middleware('permission:user-show')->name('user.show');
+    Route::get('user', [Controller\UserController::class, 'index'])->middleware('permission:user-index')->name('user.index');
+    Route::put('user/{id}', [Controller\UserController::class, 'update'])->middleware('permission:user-update')->name('user.update');
+    Route::delete('user/{id}', [Controller\UserController::class, 'destroy'])->middleware('permission:user-delete')->name('user.delete');
 });
