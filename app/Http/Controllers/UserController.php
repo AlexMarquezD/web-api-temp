@@ -2,14 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Http\Resources\UserResource;
+use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
+    private $repository;
+    
+    public function __construct(UserRepository $repository)
+    {
+        $this->repository = $repository;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -17,8 +24,8 @@ class UserController extends Controller
      */
     public function index()
     {
-        $user = User::all();
-        return response()->json($user, Response::HTTP_OK);
+        $user = $this->repository->all();
+        return response()->json(UserResource::collection($user), Response::HTTP_OK);
     }
 
     /**
@@ -34,15 +41,10 @@ class UserController extends Controller
         if ($validate->fails()) {
             return response()->json($validate->errors(), Response::HTTP_FOUND);
         }
+
         $data = $validate->validate();
 
-        $user = User::create([
-            'name' => $data['name'],
-            'password' => Hash::make($data['password']),
-            'email' => $data['email']
-        ]);
-
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $token = $this->repository->create($data);
 
         return response()->json([
             'access_token' => $token,
@@ -58,8 +60,8 @@ class UserController extends Controller
      */
     public function show(int $id)
     {
-        $user = User::find($id);
-        return response()->json($user, Response::HTTP_OK);
+        $user = $this->repository->find($id);
+        return response()->json(new UserResource($user), Response::HTTP_OK);
     }
 
     /**
@@ -71,9 +73,8 @@ class UserController extends Controller
      */
     public function update(Request $request, int $id)
     {
-        User::where('id', $id)->update($request->all());
-        $user = User::find($id);
-        return response()->json($user, Response::HTTP_OK);
+        $user = $this->repository->update($id, $request->all());
+        return response()->json(new UserResource($user), Response::HTTP_OK);
     }
 
     /**
@@ -84,7 +85,7 @@ class UserController extends Controller
      */
     public function destroy(int $id)
     {
-        User::where($id)->delete();
+        $this->repository->delete($id);
         return response()->json(['message' => 'user deleted'], Response::HTTP_NO_CONTENT);
     }
 
